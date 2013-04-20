@@ -11,7 +11,8 @@
 						'__LINUX__'
 					],
 					'cflags': [
-						'<!@(pkg-config --cflags gtk+-2.0 gthread-2.0)'
+						'<!@(pkg-config --cflags gtk+-2.0 gthread-2.0)',
+						'-I<(module_root_dir)/deps/cef'
 					],
 					'ldflags': [
 						'<!@(pkg-config  --libs-only-L --libs-only-other gtk+-2.0 gthread-2.0)',
