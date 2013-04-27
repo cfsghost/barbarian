@@ -1,16 +1,16 @@
 {
-	"name" : "gcontext",
-	"version" : "0.0.2",
-	"description": "API to use GMainContext in Node.js",
+	"name" : "barbarian",
+	"version" : "0.0.1",
+	"description": "Node.js Module for running node.js in browser",
 	"author" : "Fred Chien <cfsghost@gmail.com>",
 	"repository" : {
 		"type" : "git",
-		"url" : "git@github.com:cfsghost/node-gcontext.git"
+		"url" : "git@github.com:cfsghost/barbarian.git"
 	},
 	"engines": {
 		"node": ">= 0.8.0"
 	},
-	"main" : "./lib/gcontext",
+	"main" : "./lib/barbarian.js",
 	"scripts" : {
 		"install" : "node-gyp configure build"
 	}

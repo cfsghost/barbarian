@@ -51,12 +51,11 @@ extern "C" {
 // will cause the factory to match all domain names. The |domain_name| value
 // will be ignored for non-standard schemes. If |scheme_name| is a built-in
 // scheme and no handler is returned by |factory| then the built-in scheme
-// handler factory will be called. If |scheme_name| is a custom scheme then also
-// implement the cef_app_t::on_register_custom_schemes() function in all
-// processes. This function may be called multiple times to change or remove the
-// factory that matches the specified |scheme_name| and optional |domain_name|.
-// Returns false (0) if an error occurs. This function may be called on any
-// thread in the browser process.
+// handler factory will be called. If |scheme_name| is a custom scheme the
+// CefRegisterCustomScheme() function should be called for that scheme. This
+// function may be called multiple times to change or remove the factory that
+// matches the specified |scheme_name| and optional |domain_name|. Returns false
+// (0) if an error occurs. This function may be called on any thread.
 ///
 CEF_EXPORT int cef_register_scheme_handler_factory(
     const cef_string_t* scheme_name, const cef_string_t* domain_name,
@@ -64,7 +63,7 @@ CEF_EXPORT int cef_register_scheme_handler_factory(
 
 ///
 // Clear all registered scheme handler factories. Returns false (0) on error.
-// This function may be called on any thread in the browser process.
+// This function may be called on any thread.
 ///
 CEF_EXPORT int cef_clear_scheme_handler_factories();
 
@@ -141,12 +140,11 @@ typedef struct _cef_scheme_handler_factory_t {
   cef_base_t base;
 
   ///
-  // Return a new resource handler instance to handle the request or an NULL
-  // reference to allow default handling of the request. |browser| and |frame|
-  // will be the browser window and frame respectively that originated the
-  // request or NULL if the request did not originate from a browser window (for
-  // example, if the request came from cef_urlrequest_t). The |request| object
-  // passed to this function will not contain cookie data.
+  // Return a new resource handler instance to handle the request. |browser| and
+  // |frame| will be the browser window and frame respectively that originated
+  // the request or NULL if the request did not originate from a browser window
+  // (for example, if the request came from cef_urlrequest_t). The |request|
+  // object passed to this function will not contain cookie data.
   ///
   struct _cef_resource_handler_t* (CEF_CALLBACK *create)(
       struct _cef_scheme_handler_factory_t* self,
