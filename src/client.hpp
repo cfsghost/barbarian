@@ -12,6 +12,10 @@ class BBClient : public CefClient, public CefLoadHandler, public CefDisplayHandl
 		void OnTitleChange(CefRefPtr<CefBrowser> browser, const CefString& title);
 
 	private:
+
+		virtual CefRefPtr<CefDisplayHandler> GetDisplayHandler()
+			OVERRIDE { return this; }
+
 		IMPLEMENT_REFCOUNTING(BBClient);
 };
 
