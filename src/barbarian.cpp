@@ -29,13 +29,11 @@ namespace Barbarian {
 	static Handle<Value> CefInit(const Arguments& args)
 	{
 		HandleScope scope;
-
 		char *subprocess_path = strdup(*String::Utf8Value(args[0]->ToString()));
-		char *argv[1];
-		*argv = subprocess_path;
 
-		mainArgs = CefMainArgs(1, argv);
+		mainArgs = CefMainArgs(0, NULL);
 		app = new BBApp;
+		app->SetSubprocess(subprocess_path);
 
 		gtk_init(NULL, NULL);
 

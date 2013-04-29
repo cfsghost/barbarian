@@ -9,6 +9,11 @@ BBApp::BBApp()
 {
 }
 
+void BBApp::SetSubprocess(char *_subprocess_path)
+{
+	subprocess_path = _subprocess_path;
+}
+
 void BBApp::OnContextInitialized()
 {
 	printf("OnContextInitialized\n");
@@ -16,8 +21,5 @@ void BBApp::OnContextInitialized()
 
 void BBApp::OnBeforeChildProcessLaunch(CefRefPtr<CefCommandLine> command_line)
 {
-	printf("12312312312312909999\n");
-//	printf("======== %s\n", command_line->GetProgram().ToString().c_str());
-	command_line->SetProgram(CefString("/home/fred/opensource-work/barbarian/build/Release/subprocess.node"));
-	printf("======== %s\n", command_line->GetCommandLineString().ToString().c_str());
+	command_line->SetProgram(CefString(subprocess_path));
 }

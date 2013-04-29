@@ -8,6 +8,8 @@ class BBApp : public CefApp, public CefBrowserProcessHandler, public CefRenderPr
 	public:
 		BBApp();
 
+		void SetSubprocess(char *_subprocess_path);
+
 	private:
 
 		virtual CefRefPtr<CefBrowserProcessHandler> GetBrowserProcessHandler()
@@ -15,6 +17,8 @@ class BBApp : public CefApp, public CefBrowserProcessHandler, public CefRenderPr
 
 		virtual void OnContextInitialized() OVERRIDE;
 		virtual void OnBeforeChildProcessLaunch(CefRefPtr<CefCommandLine> command_line) OVERRIDE;
+
+		char *subprocess_path;
 
 		IMPLEMENT_REFCOUNTING(BBApp);
 };
