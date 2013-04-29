@@ -15,18 +15,41 @@ namespace Barbarian {
 	using namespace node;
 	using namespace v8;
 
+	CefSettings settings;
+	CefMainArgs mainArgs;
+	CefRefPtr<BBApp> app;
+
+	static uv_timer_t messageLoop;
+
+	void messageLoop_cb(uv_timer_t *handle, int status)
+	{
+		CefDoMessageLoopWork();
+	}
+
 	static Handle<Value> CefInit(const Arguments& args)
 	{
 		HandleScope scope;
-		CefRefPtr<BBApp> app(new BBApp);
-		CefSettings settings;
-		CefMainArgs mainArgs(0, NULL);
+
+		char *subprocess_path = strdup(*String::Utf8Value(args[0]->ToString()));
+		char *argv[1];
+		*argv = subprocess_path;
+
+		mainArgs = CefMainArgs(1, argv);
+		app = new BBApp;
+
+		gtk_init(NULL, NULL);
 
 		// Setting paths
-		CefString(&settings.resources_dir_path) = *String::Utf8Value(args[0]->ToString());
-		CefString(&settings.locales_dir_path) = *String::Utf8Value(args[1]->ToString());
+		settings.multi_threaded_message_loop = false;
+		CefString(&settings.browser_subprocess_path) = subprocess_path;
+		CefString(&settings.resources_dir_path) = strdup(*String::Utf8Value(args[1]->ToString()));
+		CefString(&settings.locales_dir_path) = strdup(*String::Utf8Value(args[2]->ToString()));
 
 		CefInitialize(mainArgs, settings, app.get());
+
+		// Integrate CEF message loop to uv
+		uv_timer_init(uv_default_loop(), &messageLoop);
+		uv_timer_start(&messageLoop, messageLoop_cb, 0, 1);
 
 		return Undefined();
 	}
@@ -35,12 +58,26 @@ namespace Barbarian {
 	{
 		HandleScope scope;
 		CefRefPtr<CefBrowser> browser;
-		CefRefPtr<BBClient> client(new BBClient);
+		CefBrowserSettings browserSettings;
 		CefWindowInfo windowInfo;
 
-		browser = CefBrowserHost::CreateBrowserSync(windowInfo, client.get(), CefString("http://www.google.com"), CefBrowserSettings());
+		// Window
+		GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+		gtk_window_set_title(GTK_WINDOW(window), "Barbarian");
+		gtk_window_set_default_size(GTK_WINDOW(window), 800, 600);
 
-		CefRunMessageLoop();
+		// Container
+		GtkWidget *vbox = gtk_vbox_new(FALSE, 0);
+		gtk_container_add(GTK_CONTAINER(window), vbox);
+
+		// Create client
+		CefRefPtr<BBClient> client(new BBClient);
+
+		windowInfo.SetAsChild(vbox);
+
+		browser = CefBrowserHost::CreateBrowserSync(windowInfo, client.get(), CefString("http://www.google.com"), browserSettings);
+
+		gtk_widget_show_all(GTK_WIDGET(window));
 
 		return Undefined();
 	}

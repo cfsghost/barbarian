@@ -7,4 +7,3 @@ var barbarian = new Barbarian();
 barbarian.init(function() {
 	barbarian.createWindow();
 });
-

@@ -3,6 +3,9 @@
 
 #include <v8.h>
 
+#define ASSERT(condition) ((void)0)
+#define REQUIRE_UI_THREAD()   ASSERT(CefCurrentlyOn(TID_UI));
+
 namespace Barbarian {
 
 #define BARBARIAN_DEFINE_CONSTANT(target, name, constant)					\

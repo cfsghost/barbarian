@@ -9,6 +9,13 @@ class BBApp : public CefApp, public CefBrowserProcessHandler, public CefRenderPr
 		BBApp();
 
 	private:
+
+		virtual CefRefPtr<CefBrowserProcessHandler> GetBrowserProcessHandler()
+			OVERRIDE { return this; }
+
+		virtual void OnContextInitialized() OVERRIDE;
+		virtual void OnBeforeChildProcessLaunch(CefRefPtr<CefCommandLine> command_line) OVERRIDE;
+
 		IMPLEMENT_REFCOUNTING(BBApp);
 };
 

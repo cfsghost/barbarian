@@ -3,10 +3,13 @@
 
 #include "include/cef_client.h"
 
-class BBClient : public CefClient, public CefLoadHandler {
+class BBClient : public CefClient, public CefLoadHandler, public CefDisplayHandler {
 
 	public:
 		BBClient();
+		CefRefPtr<CefLoadHandler> GetLoadHandler();
+		void OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame);
+		void OnTitleChange(CefRefPtr<CefBrowser> browser, const CefString& title);
 
 	private:
 		IMPLEMENT_REFCOUNTING(BBClient);
