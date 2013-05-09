@@ -59,6 +59,9 @@ namespace Barbarian {
 		CefBrowserSettings browserSettings;
 		CefWindowInfo windowInfo;
 
+		// Process arguments
+		String::Utf8Value url(args[0]);
+
 		// Window
 		GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 		gtk_window_set_title(GTK_WINDOW(window), "Barbarian");
@@ -73,7 +76,7 @@ namespace Barbarian {
 
 		windowInfo.SetAsChild(vbox);
 
-		browser = CefBrowserHost::CreateBrowserSync(windowInfo, client.get(), CefString("http://www.google.com"), browserSettings);
+		browser = CefBrowserHost::CreateBrowserSync(windowInfo, client.get(), CefString(*url), browserSettings);
 
 		gtk_widget_show_all(GTK_WIDGET(window));
 
