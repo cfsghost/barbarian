@@ -23,6 +23,12 @@ namespace Barbarian {
 		}
 	};
 
+#define BARBARIAN_EVENT_INTERNAL_REQUEST 0
+
+	// Event handlers
+	extern NodeCallback *internal_request_handler;
+
+
 }
 
 #endif

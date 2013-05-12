@@ -17,6 +17,9 @@ class BBApp : public CefApp, public CefBrowserProcessHandler, public CefRenderPr
 
 		virtual void OnContextInitialized() OVERRIDE;
 		virtual void OnBeforeChildProcessLaunch(CefRefPtr<CefCommandLine> command_line) OVERRIDE;
+		virtual void OnContextCreated(CefRefPtr<CefBrowser> browser,
+										CefRefPtr<CefFrame> frame,
+										CefRefPtr<CefV8Context> context) OVERRIDE;
 
 		char *subprocess_path;
 

@@ -19,6 +19,8 @@ namespace Barbarian {
 	CefMainArgs mainArgs;
 	CefRefPtr<BBApp> app;
 
+	NodeCallback *internal_request_handler = NULL;
+
 	static uv_timer_t messageLoop;
 
 	void messageLoop_cb(uv_timer_t *handle, int status)
@@ -83,11 +85,38 @@ namespace Barbarian {
 		return Undefined();
 	}
 
+	static Handle<Value> On(const Arguments& args)
+	{
+		HandleScope scope;
+
+		if (!args[0]->IsNumber() || !args[1]->IsFunction()) {
+			return Undefined();
+		}
+
+		switch(args[0]->ToInteger()->Value()) {
+		case BARBARIAN_EVENT_INTERNAL_REQUEST:
+			if (internal_request_handler) {
+				internal_request_handler->Holder.Dispose();
+				internal_request_handler->cb.Dispose();
+			} else {
+				internal_request_handler = new NodeCallback;
+			}
+
+			internal_request_handler->Holder = Persistent<Object>::New(args.Holder());
+			internal_request_handler->cb = Persistent<Function>::New(Handle<Function>::Cast(args[1]));
+
+			break;
+		}
+
+		return Undefined();
+	}
+
 	static void init(Handle<Object> target) {
 		HandleScope scope;
 
 		NODE_SET_METHOD(target, "init", CefInit);
 		NODE_SET_METHOD(target, "createWindow", CreateWindow);
+		NODE_SET_METHOD(target, "on", On);
 	}
 
 	NODE_MODULE(barbarian, init);
