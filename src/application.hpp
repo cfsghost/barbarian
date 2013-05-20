@@ -3,6 +3,8 @@
 
 #include "include/cef_app.h"
 
+namespace Barbarian {
+
 class BBApp : public CefApp, public CefBrowserProcessHandler, public CefRenderProcessHandler {
 
 	public:
@@ -21,9 +23,14 @@ class BBApp : public CefApp, public CefBrowserProcessHandler, public CefRenderPr
 										CefRefPtr<CefFrame> frame,
 										CefRefPtr<CefV8Context> context) OVERRIDE;
 
+		// Registers custom schemes
+		virtual void OnRegisterCustomSchemes(CefRefPtr<CefSchemeRegistrar> registrar) OVERRIDE;
+
 		char *subprocess_path;
 
 		IMPLEMENT_REFCOUNTING(BBApp);
 };
+
+}
 
 #endif

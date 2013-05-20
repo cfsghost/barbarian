@@ -18,7 +18,6 @@ namespace Barbarian {
 
 	BBClient::BBClient()
 	{
-
 	}
 
 	void BBClient::OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame)
@@ -44,9 +43,40 @@ namespace Barbarian {
 										CefRefPtr<CefFrame> frame,
 										CefRefPtr<CefRequest> request)
 	{
+		REQUIRE_UI_THREAD();
 		std::string url = request->GetURL();
 
+		if (url.find(internalURLPrefix) == 0) {
+
+			if (internal_request_handler == NULL)
+				return NULL;
+
+			BBEventMessage *message = new BBEventMessage();
+			message->event = BB_EVENT_REQUEST;
+			message->browser = browser;
+			message->frame = frame;
+			message->request = request;
+			async->data = (void *)message;
+			uv_async_send(async);
+		}
+
 		return NULL;
+	}
+
+	bool BBClient::OnBeforeResourceLoad(
+							CefRefPtr<CefBrowser> browser,
+							CefRefPtr<CefFrame> frame,
+							CefRefPtr<CefRequest> request)
+	{
+		REQUIRE_UI_THREAD();
+//		HandleScope scope;
+		std::string url = request->GetURL();
+		//printf("======= %s\n", url.c_str());
+
+		if (internal_request_handler == NULL)
+			return false;
+
+		return false;
 	}
 
 	void BBClient::OnProtocolExecution(CefRefPtr<CefBrowser> browser,
@@ -54,7 +84,9 @@ namespace Barbarian {
 													bool &allow_os_execution)
 	{
 		std::string urlStr = url;
-
+		//printf("=======--- %s\n", urlStr.c_str());
+		allow_os_execution = true;
+/*
 		if (urlStr.find(internalURLPrefix) == 0) {
 
 			if (internal_request_handler == NULL)
@@ -72,5 +104,19 @@ namespace Barbarian {
 			allow_os_execution = true;
 			internal_request_handler->cb->Call(internal_request_handler->Holder, 1, argv);
 		}
+*/
 	}
+
+	void BBClient::OnLoadError(CefRefPtr<CefBrowser> browser,
+									CefRefPtr<CefFrame> frame,
+									ErrorCode errorCode,
+									const CefString& errorText,
+									const CefString& failedUrl)
+	{
+		if (errorCode == ERR_UNKNOWN_URL_SCHEME) {
+			printf("12321123\n");
+			return;
+		}
+	}
+
 }

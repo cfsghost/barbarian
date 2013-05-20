@@ -1,11 +1,15 @@
 #ifndef BARBARIAN_CLIENT_H_ 
 #define BARBARIAN_CLIENT_H_
 
+#include <v8.h>
 #include "include/cef_client.h"
 
 namespace Barbarian {
 
-class BBClient : public CefClient, public CefLoadHandler, public CefDisplayHandler, public CefRequestHandler {
+class BBClient : public CefClient,
+					public CefLoadHandler,
+					public CefDisplayHandler,
+					public CefRequestHandler {
 
 	public:
 		BBClient();
@@ -19,7 +23,6 @@ class BBClient : public CefClient, public CefLoadHandler, public CefDisplayHandl
 			return this;
 		}
 
-		virtual void OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame) OVERRIDE;
 		virtual void OnTitleChange(CefRefPtr<CefBrowser> browser, const CefString& title) OVERRIDE;
 
 		// CefRequestHandler Methods
@@ -27,15 +30,28 @@ class BBClient : public CefClient, public CefLoadHandler, public CefDisplayHandl
 												CefRefPtr<CefBrowser> browser,
 												CefRefPtr<CefFrame> frame,
 												CefRefPtr<CefRequest> request) OVERRIDE;
+		virtual bool OnBeforeResourceLoad(
+									CefRefPtr<CefBrowser> browser,
+									CefRefPtr<CefFrame> frame,
+									CefRefPtr<CefRequest> request) OVERRIDE;
 
 		virtual void OnProtocolExecution(CefRefPtr<CefBrowser> browser,
 												const CefString& url,
 												bool &allow_os_execution) OVERRIDE;
 
+		// CefLoadHandler Methods
+		virtual void OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame) OVERRIDE;
+		virtual void OnLoadError(CefRefPtr<CefBrowser> browser,
+										CefRefPtr<CefFrame> frame,
+										ErrorCode errorCode,
+										const CefString& errorText,
+										const CefString& failedUrl) OVERRIDE;
+
 	private:
 
-		virtual CefRefPtr<CefDisplayHandler> GetDisplayHandler()
-			OVERRIDE { return this; }
+		virtual CefRefPtr<CefDisplayHandler> GetDisplayHandler() OVERRIDE {
+			return this;
+		}
 
 		IMPLEMENT_REFCOUNTING(BBClient);
 };

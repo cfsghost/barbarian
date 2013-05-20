@@ -11,7 +11,8 @@
 			'sources': [
 				'src/barbarian.cpp',
 				'src/application.cpp',
-				'src/client.cpp'
+				'src/client.cpp',
+				'src/scheme.cpp'
 			],
 			'defines': [
 				'USING_CEF_SHARED'

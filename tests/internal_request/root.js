@@ -5,5 +5,9 @@ var Barbarian = require('../../');
 var barbarian = new Barbarian();
 
 barbarian.init(function() {
-	barbarian.createWindow('barbarian://');
+	barbarian.createWindow('barbarian://content/');
+});
+
+barbarian.on('request', function(req) {
+	console.log(req);
 });

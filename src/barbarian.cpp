@@ -9,6 +9,7 @@
 #include "barbarian.hpp"
 #include "application.hpp"
 #include "client.hpp"
+#include "scheme.hpp"
 
 namespace Barbarian {
  
@@ -20,12 +21,32 @@ namespace Barbarian {
 	CefRefPtr<BBApp> app;
 
 	NodeCallback *internal_request_handler = NULL;
+	uv_async_t *async = new uv_async_t;
 
 	static uv_timer_t messageLoop;
 
 	void messageLoop_cb(uv_timer_t *handle, int status)
 	{
 		CefDoMessageLoopWork();
+	}
+
+	void InternalEventHandler(uv_async_t *handle, int status)
+	{
+		HandleScope scope;
+		BBEventMessage *message = (BBEventMessage *)(handle->data);
+		std::string url = message->request->GetURL();
+
+		// Make a new object for JavaScript
+		Local<Object> event = Object::New();
+		event->Set(String::NewSymbol("event"), Integer::New(message->event));
+		event->Set(String::NewSymbol("url"), String::New(url.c_str()));
+
+		// Preparing arguments
+		Local<Value> argv[1] = {
+			event
+		};
+
+		internal_request_handler->cb->Call(internal_request_handler->Holder, 1, argv);
 	}
 
 	static Handle<Value> CefInit(const Arguments& args)
@@ -50,6 +71,9 @@ namespace Barbarian {
 		// Integrate CEF message loop to uv
 		uv_timer_init(uv_default_loop(), &messageLoop);
 		uv_timer_start(&messageLoop, messageLoop_cb, 0, 1);
+		uv_async_init(uv_default_loop(), async, InternalEventHandler);
+
+		CefRegisterSchemeHandlerFactory("barbarian", "content", new BBSchemeHandlerFactory());
 
 		return Undefined();
 	}
@@ -78,35 +102,33 @@ namespace Barbarian {
 
 		windowInfo.SetAsChild(vbox);
 
-		browser = CefBrowserHost::CreateBrowserSync(windowInfo, client.get(), CefString(*url), browserSettings);
+		//browser = CefBrowserHost::CreateBrowserSync(windowInfo, client.get(), CefString(*url), browserSettings);
+		CefBrowserHost::CreateBrowser(windowInfo, client.get(), CefString(*url), browserSettings);
 
 		gtk_widget_show_all(GTK_WIDGET(window));
+
+		printf("CreateWindow %d\n", PID_BROWSER);
 
 		return Undefined();
 	}
 
-	static Handle<Value> On(const Arguments& args)
+	static Handle<Value> SetEventHandler(const Arguments& args)
 	{
 		HandleScope scope;
 
-		if (!args[0]->IsNumber() || !args[1]->IsFunction()) {
+		if (!args[0]->IsFunction()) {
 			return Undefined();
 		}
 
-		switch(args[0]->ToInteger()->Value()) {
-		case BARBARIAN_EVENT_INTERNAL_REQUEST:
-			if (internal_request_handler) {
-				internal_request_handler->Holder.Dispose();
-				internal_request_handler->cb.Dispose();
-			} else {
-				internal_request_handler = new NodeCallback;
-			}
-
-			internal_request_handler->Holder = Persistent<Object>::New(args.Holder());
-			internal_request_handler->cb = Persistent<Function>::New(Handle<Function>::Cast(args[1]));
-
-			break;
+		if (internal_request_handler) {
+			internal_request_handler->Holder.Dispose();
+			internal_request_handler->cb.Dispose();
+		} else {
+			internal_request_handler = new NodeCallback;
 		}
+
+		internal_request_handler->Holder = Persistent<Object>::New(args.Holder());
+		internal_request_handler->cb = Persistent<Function>::New(Handle<Function>::Cast(args[0]));
 
 		return Undefined();
 	}
@@ -116,7 +138,7 @@ namespace Barbarian {
 
 		NODE_SET_METHOD(target, "init", CefInit);
 		NODE_SET_METHOD(target, "createWindow", CreateWindow);
-		NODE_SET_METHOD(target, "on", On);
+		NODE_SET_METHOD(target, "setEventHandler", SetEventHandler);
 	}
 
 	NODE_MODULE(barbarian, init);

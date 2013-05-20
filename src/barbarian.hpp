@@ -2,9 +2,12 @@
 #define BARBARIAN_H_
 
 #include <v8.h>
+#include "uv.h"
+#include "include/cef_v8.h"
 
 #define ASSERT(condition) ((void)0)
 #define REQUIRE_UI_THREAD()   ASSERT(CefCurrentlyOn(TID_UI));
+#define REQUIRE_IO_THREAD()   ASSERT(CefCurrentlyOn(TID_IO));
 
 namespace Barbarian {
 
@@ -23,12 +26,21 @@ namespace Barbarian {
 		}
 	};
 
-#define BARBARIAN_EVENT_INTERNAL_REQUEST 0
+	// Event message
+	typedef enum {
+		BB_EVENT_REQUEST
+	} BBEvent;
+
+	struct BBEventMessage {
+		BBEvent event;
+		CefRefPtr<CefBrowser> browser;
+		CefRefPtr<CefFrame> frame;
+		CefRefPtr<CefRequest> request;
+	};
 
 	// Event handlers
 	extern NodeCallback *internal_request_handler;
-
-
+	extern uv_async_t *async;
 }
 
 #endif
