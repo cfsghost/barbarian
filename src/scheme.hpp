@@ -29,6 +29,9 @@ class BBSchemeHandler : public CefResourceHandler {
 									CefRefPtr<CefCallback> callback) OVERRIDE;
 
 	private:
+		std::string data_;
+		std::string mime_type_;
+		size_t offset_;
 
 		IMPLEMENT_REFCOUNTING(BBSchemeHandler);
 		IMPLEMENT_LOCKING(BBSchemeHandler);

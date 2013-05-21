@@ -4,6 +4,7 @@
 #include <v8.h>
 #include "uv.h"
 #include "include/cef_v8.h"
+#include "include/cef_callback.h"
 
 #define ASSERT(condition) ((void)0)
 #define REQUIRE_UI_THREAD()   ASSERT(CefCurrentlyOn(TID_UI));
@@ -36,6 +37,7 @@ namespace Barbarian {
 		CefRefPtr<CefBrowser> browser;
 		CefRefPtr<CefFrame> frame;
 		CefRefPtr<CefRequest> request;
+		CefRefPtr<CefCallback> callback;
 	};
 
 	// Event handlers

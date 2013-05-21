@@ -50,7 +50,8 @@ namespace Barbarian {
 
 			if (internal_request_handler == NULL)
 				return NULL;
-
+/*
+			printf("GetResourceHandler\n");
 			BBEventMessage *message = new BBEventMessage();
 			message->event = BB_EVENT_REQUEST;
 			message->browser = browser;
@@ -58,6 +59,7 @@ namespace Barbarian {
 			message->request = request;
 			async->data = (void *)message;
 			uv_async_send(async);
+*/
 		}
 
 		return NULL;

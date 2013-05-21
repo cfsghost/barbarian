@@ -41,12 +41,25 @@ namespace Barbarian {
 		event->Set(String::NewSymbol("event"), Integer::New(message->event));
 		event->Set(String::NewSymbol("url"), String::New(url.c_str()));
 
+		if (message->callback) {
+
+			Handle<ObjectTemplate> templ = ObjectTemplate::New();
+			templ->SetInternalFieldCount(1);
+
+			Local<Object> obj = templ->NewInstance();
+			obj->SetInternalField(0, External::New(message->callback));
+
+			event->Set(String::NewSymbol("callback"), obj);
+		}
+
 		// Preparing arguments
 		Local<Value> argv[1] = {
 			event
 		};
 
 		internal_request_handler->cb->Call(internal_request_handler->Holder, 1, argv);
+
+		delete message;
 	}
 
 	static Handle<Value> CefInit(const Arguments& args)
@@ -133,12 +146,25 @@ namespace Barbarian {
 		return Undefined();
 	}
 
+	static Handle<Value> RunCallback(const Arguments& args)
+	{
+		HandleScope scope;
+
+		Local<External> wrap = Local<External>::Cast(args[0]->ToObject()->GetInternalField(0));
+		CefRefPtr<CefCallback> callback = (CefCallback *)(wrap->Value());
+
+		callback->Continue();
+
+		return Undefined();
+	}
+
 	static void init(Handle<Object> target) {
 		HandleScope scope;
 
 		NODE_SET_METHOD(target, "init", CefInit);
 		NODE_SET_METHOD(target, "createWindow", CreateWindow);
 		NODE_SET_METHOD(target, "setEventHandler", SetEventHandler);
+		NODE_SET_METHOD(target, "runCallback", RunCallback);
 	}
 
 	NODE_MODULE(barbarian, init);

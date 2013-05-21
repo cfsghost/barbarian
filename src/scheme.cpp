@@ -20,6 +20,31 @@ namespace Barbarian {
 	{
 		REQUIRE_IO_THREAD();
 
+		AutoLock lock_scope(this);
+
+		std::string url = request->GetURL();
+
+		if (url.find(internalURLPrefix) == 0) {
+
+			if (internal_request_handler == NULL)
+				return false;
+
+			mime_type_ = "text/html";
+			data_ = "<h2>TEST</h2>";
+
+			printf("ProcessRequest\n");
+			BBEventMessage *message = new BBEventMessage();
+			message->event = BB_EVENT_REQUEST;
+			message->callback = callback;
+			message->request = request;
+			async->data = (void *)message;
+			uv_async_send(async);
+
+//			callback->Continue();
+
+			return true;
+		}
+
 		return false;
 	}
 
@@ -28,6 +53,13 @@ namespace Barbarian {
 							CefString& redirectUrl)
 	{
 		REQUIRE_IO_THREAD();
+		printf("GetResponseHeaders\n");
+
+		response->SetMimeType(mime_type_);
+		response->SetStatus(200);
+
+		// Set the resulting response length
+		response_length = data_.length();
 	}
 
 	bool BBSchemeHandler::ReadResponse(void* data_out,
@@ -36,7 +68,22 @@ namespace Barbarian {
 						CefRefPtr<CefCallback> callback)
 	{
 		REQUIRE_IO_THREAD();
+		printf("ReadResponse\n");
 
-		return false;
+		bool has_data = false;
+		bytes_read = 0;
+
+		AutoLock lock_scope(this);
+
+		if (offset_ < data_.length()) {
+
+			int transfer_size = (std::min)(bytes_to_read, static_cast<int>(data_.length() - offset_));
+			memcpy(data_out, data_.c_str() + offset_, transfer_size);
+			offset_ += transfer_size;
+			bytes_read = transfer_size;
+			has_data = true;
+		}
+
+		return has_data;
 	}
 }

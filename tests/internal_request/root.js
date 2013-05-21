@@ -8,6 +8,8 @@ barbarian.init(function() {
 	barbarian.createWindow('barbarian://content/');
 });
 
-barbarian.on('request', function(req) {
+barbarian.on('request', function(req, callback) {
+	callback();
 	console.log(req);
+	console.log(callback);
 });
