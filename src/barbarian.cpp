@@ -44,13 +44,12 @@ namespace Barbarian {
 		if (message->callback) {
 
 			Handle<ObjectTemplate> templ = ObjectTemplate::New();
-			templ->SetInternalFieldCount(2);
+			templ->SetInternalFieldCount(1);
 
 			Local<Object> obj = templ->NewInstance();
-			obj->SetInternalField(0, External::New(message->userdata));
-			obj->SetInternalField(1, External::New(message->callback));
+			obj->SetInternalField(0, External::New(message));
 
-			event->Set(String::NewSymbol("callback"), obj);
+			event->Set(String::NewSymbol("messageObject"), obj);
 		}
 
 		// Preparing arguments
@@ -59,8 +58,6 @@ namespace Barbarian {
 		};
 
 		internal_request_handler->cb->Call(internal_request_handler->Holder, 1, argv);
-
-		delete message;
 	}
 
 	static Handle<Value> CefInit(const Arguments& args)
@@ -88,6 +85,7 @@ namespace Barbarian {
 		uv_async_init(uv_default_loop(), async, InternalEventHandler);
 
 		CefRegisterSchemeHandlerFactory("barbarian", "content", new BBSchemeHandlerFactory());
+		CefRegisterSchemeHandlerFactory("barbarian", "engine", new BBSchemeHandlerFactory());
 
 		return Undefined();
 	}
@@ -151,10 +149,12 @@ namespace Barbarian {
 	{
 		HandleScope scope;
 
-		Local<External> wrap = Local<External>::Cast(args[0]->ToObject()->GetInternalField(1));
-		CefRefPtr<CefCallback> callback = (CefCallback *)(wrap->Value());
+		Local<External> wrap = Local<External>::Cast(args[0]->ToObject()->GetInternalField(0));
+		BBEventMessage *message = (BBEventMessage *)(wrap->Value());
 
-		callback->Continue();
+		message->callback->Continue();
+
+		delete message;
 
 		return Undefined();
 	}
@@ -163,10 +163,40 @@ namespace Barbarian {
 	{
 		HandleScope scope;
 
+		// Get Scheme instance
 		Local<External> wrap = Local<External>::Cast(args[0]->ToObject()->GetInternalField(0));
-		BBSchemeHandler *scheme = (BBSchemeHandler *)(wrap->Value());
+		BBEventMessage *message = (BBEventMessage *)(wrap->Value());
+		BBSchemeHandler *scheme = (BBSchemeHandler *)(message->userdata);
 
 		scheme->SetContent(*String::Utf8Value(args[1]->ToString()));
+
+		return Undefined();
+	}
+
+	static Handle<Value> SetMIMEType(const Arguments& args)
+	{
+		HandleScope scope;
+
+		// Get Scheme instance
+		Local<External> wrap = Local<External>::Cast(args[0]->ToObject()->GetInternalField(0));
+		BBEventMessage *message = (BBEventMessage *)(wrap->Value());
+		BBSchemeHandler *scheme = (BBSchemeHandler *)(message->userdata);
+
+		scheme->SetMIMEType(*String::Utf8Value(args[1]->ToString()));
+
+		return Undefined();
+	}
+
+	static Handle<Value> SetStatus(const Arguments& args)
+	{
+		HandleScope scope;
+
+		// Get Scheme instance
+		Local<External> wrap = Local<External>::Cast(args[0]->ToObject()->GetInternalField(0));
+		BBEventMessage *message = (BBEventMessage *)(wrap->Value());
+		BBSchemeHandler *scheme = (BBSchemeHandler *)(message->userdata);
+
+		scheme->SetStatus(args[1]->ToInteger()->Value());
 
 		return Undefined();
 	}
@@ -179,6 +209,8 @@ namespace Barbarian {
 		NODE_SET_METHOD(target, "setEventHandler", SetEventHandler);
 		NODE_SET_METHOD(target, "runCallback", RunCallback);
 		NODE_SET_METHOD(target, "setContent", SetContent);
+		NODE_SET_METHOD(target, "setMIMEType", SetMIMEType);
+		NODE_SET_METHOD(target, "setStatus", SetStatus);
 	}
 
 	NODE_MODULE(barbarian, init);

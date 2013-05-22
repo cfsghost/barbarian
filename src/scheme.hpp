@@ -30,8 +30,10 @@ class BBSchemeHandler : public CefResourceHandler {
 
 		void SetContent(std::string data);
 		void SetMIMEType(std::string mime_type);
+		void SetStatus(int status);
 
 	private:
+		int status_;
 		std::string data_;
 		std::string mime_type_;
 		size_t offset_;

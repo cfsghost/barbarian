@@ -13,7 +13,7 @@ namespace Barbarian {
 
 	BBSchemeHandler::BBSchemeHandler()
 	{
-
+		offset_ = 0;
 	}
 
 	void BBSchemeHandler::SetContent(std::string data)
@@ -24,6 +24,11 @@ namespace Barbarian {
 	void BBSchemeHandler::SetMIMEType(std::string mime_type)
 	{
 		mime_type_ = mime_type;
+	}
+
+	void BBSchemeHandler::SetStatus(int status)
+	{
+		status_ = status;
 	}
 
 	bool BBSchemeHandler::ProcessRequest(CefRefPtr<CefRequest> request, CefRefPtr<CefCallback> callback)
@@ -39,10 +44,13 @@ namespace Barbarian {
 			if (internal_request_handler == NULL)
 				return false;
 
+			// Default status
+			offset_ = 0;
 			mime_type_ = "text/html";
-			data_ = "<h2>TEST</h2>";
+			data_ = "";
+			status_ = 200;
 
-			printf("ProcessRequest\n");
+			// Preparing event message to JavaScript environment
 			BBEventMessage *message = new BBEventMessage();
 			message->event = BB_EVENT_REQUEST;
 			message->callback = callback;
@@ -50,8 +58,6 @@ namespace Barbarian {
 			message->userdata = (void *)this;
 			async->data = (void *)message;
 			uv_async_send(async);
-
-//			callback->Continue();
 
 			return true;
 		}
@@ -67,7 +73,7 @@ namespace Barbarian {
 		printf("GetResponseHeaders\n");
 
 		response->SetMimeType(mime_type_);
-		response->SetStatus(200);
+		response->SetStatus(status_);
 
 		// Set the resulting response length
 		response_length = data_.length();
@@ -94,6 +100,7 @@ namespace Barbarian {
 			bytes_read = transfer_size;
 			has_data = true;
 		}
+
 
 		return has_data;
 	}
