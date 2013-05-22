@@ -44,10 +44,11 @@ namespace Barbarian {
 		if (message->callback) {
 
 			Handle<ObjectTemplate> templ = ObjectTemplate::New();
-			templ->SetInternalFieldCount(1);
+			templ->SetInternalFieldCount(2);
 
 			Local<Object> obj = templ->NewInstance();
-			obj->SetInternalField(0, External::New(message->callback));
+			obj->SetInternalField(0, External::New(message->userdata));
+			obj->SetInternalField(1, External::New(message->callback));
 
 			event->Set(String::NewSymbol("callback"), obj);
 		}
@@ -150,10 +151,22 @@ namespace Barbarian {
 	{
 		HandleScope scope;
 
-		Local<External> wrap = Local<External>::Cast(args[0]->ToObject()->GetInternalField(0));
+		Local<External> wrap = Local<External>::Cast(args[0]->ToObject()->GetInternalField(1));
 		CefRefPtr<CefCallback> callback = (CefCallback *)(wrap->Value());
 
 		callback->Continue();
+
+		return Undefined();
+	}
+
+	static Handle<Value> SetContent(const Arguments& args)
+	{
+		HandleScope scope;
+
+		Local<External> wrap = Local<External>::Cast(args[0]->ToObject()->GetInternalField(0));
+		BBSchemeHandler *scheme = (BBSchemeHandler *)(wrap->Value());
+
+		scheme->SetContent(*String::Utf8Value(args[1]->ToString()));
 
 		return Undefined();
 	}
@@ -165,6 +178,7 @@ namespace Barbarian {
 		NODE_SET_METHOD(target, "createWindow", CreateWindow);
 		NODE_SET_METHOD(target, "setEventHandler", SetEventHandler);
 		NODE_SET_METHOD(target, "runCallback", RunCallback);
+		NODE_SET_METHOD(target, "setContent", SetContent);
 	}
 
 	NODE_MODULE(barbarian, init);

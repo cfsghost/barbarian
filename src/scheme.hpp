@@ -28,6 +28,9 @@ class BBSchemeHandler : public CefResourceHandler {
 									int& bytes_read,
 									CefRefPtr<CefCallback> callback) OVERRIDE;
 
+		void SetContent(std::string data);
+		void SetMIMEType(std::string mime_type);
+
 	private:
 		std::string data_;
 		std::string mime_type_;

@@ -16,6 +16,16 @@ namespace Barbarian {
 
 	}
 
+	void BBSchemeHandler::SetContent(std::string data)
+	{
+		data_ = data;
+	}
+
+	void BBSchemeHandler::SetMIMEType(std::string mime_type)
+	{
+		mime_type_ = mime_type;
+	}
+
 	bool BBSchemeHandler::ProcessRequest(CefRefPtr<CefRequest> request, CefRefPtr<CefCallback> callback)
 	{
 		REQUIRE_IO_THREAD();
@@ -37,6 +47,7 @@ namespace Barbarian {
 			message->event = BB_EVENT_REQUEST;
 			message->callback = callback;
 			message->request = request;
+			message->userdata = (void *)this;
 			async->data = (void *)message;
 			uv_async_send(async);
 
@@ -62,7 +73,7 @@ namespace Barbarian {
 		response_length = data_.length();
 	}
 
-	bool BBSchemeHandler::ReadResponse(void* data_out,
+	bool BBSchemeHandler::ReadResponse(void *data_out,
 						int bytes_to_read,
 						int& bytes_read,
 						CefRefPtr<CefCallback> callback)

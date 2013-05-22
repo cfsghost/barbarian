@@ -38,6 +38,8 @@ namespace Barbarian {
 		CefRefPtr<CefFrame> frame;
 		CefRefPtr<CefRequest> request;
 		CefRefPtr<CefCallback> callback;
+
+		void *userdata;
 	};
 
 	// Event handlers
