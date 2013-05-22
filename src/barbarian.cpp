@@ -21,7 +21,6 @@ namespace Barbarian {
 	CefRefPtr<BBApp> app;
 
 	NodeCallback *internal_request_handler = NULL;
-	uv_async_t *async = new uv_async_t;
 
 	static uv_timer_t messageLoop;
 
@@ -82,7 +81,6 @@ namespace Barbarian {
 		// Integrate CEF message loop to uv
 		uv_timer_init(uv_default_loop(), &messageLoop);
 		uv_timer_start(&messageLoop, messageLoop_cb, 0, 1);
-		uv_async_init(uv_default_loop(), async, InternalEventHandler);
 
 		CefRegisterSchemeHandlerFactory("barbarian", "content", new BBSchemeHandlerFactory());
 		CefRegisterSchemeHandlerFactory("barbarian", "engine", new BBSchemeHandlerFactory());

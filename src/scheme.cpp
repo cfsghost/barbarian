@@ -35,14 +35,15 @@ namespace Barbarian {
 	{
 		REQUIRE_IO_THREAD();
 
+		if (internal_request_handler == NULL)
+			return false;
+
 		AutoLock lock_scope(this);
 
 		std::string url = request->GetURL();
 
 		if (url.find(internalURLPrefix) == 0) {
-
-			if (internal_request_handler == NULL)
-				return false;
+			printf("ProcessRequest\n");
 
 			// Default status
 			offset_ = 0;
@@ -56,7 +57,10 @@ namespace Barbarian {
 			message->callback = callback;
 			message->request = request;
 			message->userdata = (void *)this;
+
+			uv_async_t *async = new uv_async_t;
 			async->data = (void *)message;
+			uv_async_init(uv_default_loop(), async, InternalEventHandler);
 			uv_async_send(async);
 
 			return true;
@@ -100,7 +104,6 @@ namespace Barbarian {
 			bytes_read = transfer_size;
 			has_data = true;
 		}
-
 
 		return has_data;
 	}

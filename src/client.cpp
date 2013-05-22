@@ -73,7 +73,7 @@ namespace Barbarian {
 		REQUIRE_UI_THREAD();
 //		HandleScope scope;
 		std::string url = request->GetURL();
-		//printf("======= %s\n", url.c_str());
+//		printf("======= %s\n", url.c_str());
 
 		if (internal_request_handler == NULL)
 			return false;
@@ -87,7 +87,6 @@ namespace Barbarian {
 	{
 		std::string urlStr = url;
 		//printf("=======--- %s\n", urlStr.c_str());
-		allow_os_execution = true;
 /*
 		if (urlStr.find(internalURLPrefix) == 0) {
 
@@ -116,7 +115,6 @@ namespace Barbarian {
 									const CefString& failedUrl)
 	{
 		if (errorCode == ERR_UNKNOWN_URL_SCHEME) {
-			printf("12321123\n");
 			return;
 		}
 	}

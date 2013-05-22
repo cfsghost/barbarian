@@ -44,7 +44,8 @@ namespace Barbarian {
 
 	// Event handlers
 	extern NodeCallback *internal_request_handler;
-	extern uv_async_t *async;
+
+	void InternalEventHandler(uv_async_t *handle, int status);
 }
 
 #endif

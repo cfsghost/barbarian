@@ -9,6 +9,7 @@ barbarian.init(function() {
 });
 
 barbarian.on('request', function(req, res) {
+	console.log(req);
 	res.set('Content-Type', 'text/html');
 	res.end('<h1>Nice Barbarian!</h1>');
 });
