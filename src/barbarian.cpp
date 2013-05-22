@@ -57,6 +57,8 @@ namespace Barbarian {
 		};
 
 		internal_request_handler->cb->Call(internal_request_handler->Holder, 1, argv);
+
+		uv_close((uv_handle_t *)handle, NULL);
 	}
 
 	static Handle<Value> CefInit(const Arguments& args)
