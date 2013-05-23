@@ -206,6 +206,25 @@ namespace Barbarian {
 		return Undefined();
 	}
 
+	static Handle<Value> WindowInterface(const Arguments& args)
+	{
+		HandleScope scope;
+
+		if (!args[0]->IsObject() || !args[1]->IsString()) {
+			return Undefined();
+		}
+
+		// Get Scheme instance
+		Local<External> wrap = Local<External>::Cast(args[0]->ToObject()->GetInternalField(0));
+		BBEventMessage *message = (BBEventMessage *)(wrap->Value());
+
+		if (strcmp(*String::Utf8Value(args[1]->ToString()), "loadURL") == 0) {
+			message->browser->GetMainFrame()->LoadURL(*String::Utf8Value(args[2]->ToString()));
+		}
+
+		return Undefined();
+	}
+
 	static void init(Handle<Object> target) {
 		HandleScope scope;
 
@@ -216,6 +235,8 @@ namespace Barbarian {
 		NODE_SET_METHOD(target, "setContent", SetContent);
 		NODE_SET_METHOD(target, "setMIMEType", SetMIMEType);
 		NODE_SET_METHOD(target, "setStatus", SetStatus);
+
+		NODE_SET_METHOD(target, "windowInterface", WindowInterface);
 	}
 
 	NODE_MODULE(barbarian, init);
