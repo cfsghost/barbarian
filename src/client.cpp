@@ -20,6 +20,22 @@ namespace Barbarian {
 	{
 	}
 
+	void BBClient::OnAfterCreated(CefRefPtr<CefBrowser> browser)
+	{
+		m_browser = browser;
+
+		// Preparing event message to JavaScript environment
+		BBEventMessage *message = new BBEventMessage();
+		message->event = BB_EVENT_WINDOW_CREATED;
+		message->browser = browser;
+		message->userdata = (void *)this;
+
+		uv_async_t *async = new uv_async_t;
+		async->data = (void *)message;
+		uv_async_init(uv_default_loop(), async, InternalEventHandler);
+		uv_async_send(async);
+	}
+
 	void BBClient::OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame)
 	{
 		REQUIRE_UI_THREAD();
@@ -50,16 +66,6 @@ namespace Barbarian {
 
 			if (internal_request_handler == NULL)
 				return NULL;
-			printf("GetResourceHandler\n");
-/*
-			BBEventMessage *message = new BBEventMessage();
-			message->event = BB_EVENT_REQUEST;
-			message->browser = browser;
-			message->frame = frame;
-			message->request = request;
-			async->data = (void *)message;
-			uv_async_send(async);
-*/
 		}
 
 		return NULL;

@@ -7,12 +7,15 @@
 namespace Barbarian {
 
 class BBClient : public CefClient,
+					public CefLifeSpanHandler,
 					public CefLoadHandler,
 					public CefDisplayHandler,
 					public CefRequestHandler {
 
 	public:
 		BBClient();
+
+		CefRefPtr<CefBrowser> GetBrowser() { return m_browser; }
 
 		// BBClient methods
 		virtual CefRefPtr<CefLoadHandler> GetLoadHandler() OVERRIDE {
@@ -24,6 +27,10 @@ class BBClient : public CefClient,
 		}
 
 		virtual void OnTitleChange(CefRefPtr<CefBrowser> browser, const CefString& title) OVERRIDE;
+
+		// CefLifeSpanHandler Methods
+		virtual CefRefPtr<CefLifeSpanHandler> GetLifeSpanHandler() OVERRIDE { return this; }
+		virtual void OnAfterCreated(CefRefPtr<CefBrowser> browser) OVERRIDE;
 
 		// CefRequestHandler Methods
 		virtual CefRefPtr<CefResourceHandler> GetResourceHandler(
@@ -54,6 +61,9 @@ class BBClient : public CefClient,
 		}
 
 		IMPLEMENT_REFCOUNTING(BBClient);
+
+	protected:
+		CefRefPtr<CefBrowser> m_browser;
 };
 
 }

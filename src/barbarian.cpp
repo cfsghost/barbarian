@@ -33,14 +33,19 @@ namespace Barbarian {
 	{
 		HandleScope scope;
 		BBEventMessage *message = (BBEventMessage *)(handle->data);
-		std::string url = message->request->GetURL();
 
 		// Make a new object for JavaScript
 		Local<Object> event = Object::New();
 		event->Set(String::NewSymbol("event"), Integer::New(message->event));
-		event->Set(String::NewSymbol("url"), String::New(url.c_str()));
 
-		if (message->callback) {
+		// Request event
+		if (message->request) {
+			std::string url = message->request->GetURL();
+			event->Set(String::NewSymbol("url"), String::New(url.c_str()));
+		}
+
+		// It requires to pass message object
+		if (message->browser || message->callback) {
 
 			Handle<ObjectTemplate> templ = ObjectTemplate::New();
 			templ->SetInternalFieldCount(1);

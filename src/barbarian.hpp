@@ -29,6 +29,7 @@ namespace Barbarian {
 
 	// Event message
 	typedef enum {
+		BB_EVENT_WINDOW_CREATED,
 		BB_EVENT_REQUEST
 	} BBEvent;
 
