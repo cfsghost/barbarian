@@ -225,6 +225,20 @@ namespace Barbarian {
 		return Undefined();
 	}
 
+	static Handle<Value> RegisterExtension(const Arguments& args)
+	{
+		HandleScope scope;
+
+		if (!args[0]->IsString() || !args[1]->IsString()) {
+			return Undefined();
+		}
+
+		printf("%s\n", *String::Utf8Value(args[1]->ToString()));
+		CefRegisterExtension(*String::Utf8Value(args[0]->ToString()), *String::Utf8Value(args[1]->ToString()), NULL);
+
+		return Undefined();
+	}
+
 	static void init(Handle<Object> target) {
 		HandleScope scope;
 
@@ -235,6 +249,7 @@ namespace Barbarian {
 		NODE_SET_METHOD(target, "setContent", SetContent);
 		NODE_SET_METHOD(target, "setMIMEType", SetMIMEType);
 		NODE_SET_METHOD(target, "setStatus", SetStatus);
+		NODE_SET_METHOD(target, "registerExtension", RegisterExtension);
 
 		NODE_SET_METHOD(target, "windowInterface", WindowInterface);
 	}
